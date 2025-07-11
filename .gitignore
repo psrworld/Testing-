@@ -40,6 +40,11 @@ typings/
 # Optional npm cache directory
 .npm
 
+tsconfig.json
+package-lock.json
+.gitignore
+example/
+__test__/
 # Optional eslint cache
 .eslintcache
 
