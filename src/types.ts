@@ -1,33 +1,79 @@
-export type ThemeMode = 'light' | 'dark' | 'system';
+import { ReactNode, CSSProperties } from 'react';
+
+export type Theme = 'light' | 'dark' | 'system' | string;
 
 export interface ThemeConfig {
-  defaultMode?: ThemeMode;
+  /**
+   * Default theme to use
+   * @default 'system'
+   */
+  defaultTheme?: string;
+  
+  /**
+   * Key used to store theme in localStorage
+   * @default 'psr-theme'
+   */
   storageKey?: string;
+  
+  /**
+   * HTML attribute to set on the target element
+   * @default 'data-theme'
+   */
   attribute?: string;
+  
+  /**
+   * Whether to enable system theme detection
+   * @default true
+   */
   enableSystem?: boolean;
-  disableTransitions?: boolean;
+  
+  /**
+   * Disable CSS transitions when changing themes
+   * @default false
+   */
+  disableTransitionOnChange?: boolean;
+  
+  /**
+   * CSS selector for the element to apply theme to
+   * @default 'html'
+   */
+  selector?: string;
+  
+  /**
+   * Available theme names
+   * @default ['light', 'dark']
+   */
+  themes?: string[];
+  
+  /**
+   * Media query for detecting system theme
+   * @default '(prefers-color-scheme: dark)'
+   */
+  mediaQuery?: string;
 }
 
-export interface ThemeColors {
-  light: Record<string, string>;
-  dark: Record<string, string>;
+export interface ThemeProviderProps {
+  children: ReactNode;
+  config?: ThemeConfig;
+  forcedTheme?: string;
 }
 
-export interface ThemeSystemEvents {
-  'theme-changed': CustomEvent<{ theme: ThemeMode; resolvedTheme: 'light' | 'dark' }>;
+export interface ThemeContextType {
+  theme: string;
+  setTheme: (theme: string) => void;
+  resolvedTheme: string;
+  themes: string[];
+  forcedTheme?: string;
+  systemTheme: 'light' | 'dark';
 }
 
-export interface ThemeSystem {
-  theme: ThemeMode;
-  resolvedTheme: 'light' | 'dark';
-  setTheme: (theme: ThemeMode) => void;
-  toggleTheme: () => void;
-  subscribe: (callback: (theme: ThemeMode, resolvedTheme: 'light' | 'dark') => void) => () => void;
-  destroy: () => void;
-}
-
-export interface MediaQueryList {
-  matches: boolean;
-  addEventListener: (type: string, listener: EventListener) => void;
-  removeEventListener: (type: string, listener: EventListener) => void;
+export interface ThemeToggleProps {
+  className?: string;
+  style?: CSSProperties;
+  size?: 'small' | 'medium' | 'large';
+  showLabels?: boolean;
+  lightLabel?: string;
+  darkLabel?: string;
+  systemLabel?: string;
+  onThemeChange?: (theme: string) => void;
 }

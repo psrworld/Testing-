@@ -1,322 +1,391 @@
-# Theme Mode System
+# PSR Theme Mode
 
-A lightweight, flexible dark/light theme system with TypeScript support and zero dependencies.
+A lightweight, flexible dark/light theme system for React applications with TypeScript support.
 
 ## Features
 
-- 🌙 **Dark/Light/System modes** - Full support for user preference detection
-- 🔄 **Automatic switching** - Responds to system preference changes
-- 💾 **Persistent storage** - Remembers user choice across sessions
-- 🎨 **CSS variables** - Complete theming system with utility classes
-- 📱 **SSR friendly** - Works with server-side rendering
-- 🔧 **TypeScript support** - Full type definitions included
-- 🪶 **Zero dependencies** - No external dependencies
-- 🎯 **Framework agnostic** - Works with any JavaScript framework
+- 🌙 **Dark/Light/System theme support**
+- 🎨 **CSS custom properties integration**
+- 💾 **Persistent theme storage**
+- 🔧 **Highly customizable**
+- 📱 **System theme detection**
+- ⚡ **Lightweight and performant**
+- 🔒 **TypeScript support**
+- 🧩 **Framework agnostic CSS**
 
 ## Installation
 
 ```bash
-npm install theme-mode-system
+npm install psr-theme-mode
 ```
 
 ## Quick Start
 
-### Basic Usage
+### 1. Wrap your app with ThemeProvider
 
-```javascript
-import { createThemeSystem } from 'theme-mode-system';
+```tsx
+import React from 'react';
+import { ThemeProvider, ThemeToggle } from 'psr-theme-mode';
+import 'psr-theme-mode/dist/styles.css';
 
-// Create theme system
-const themeSystem = createThemeSystem();
+function App() {
+  return (
+    <ThemeProvider>
+      <div className="psr-themed">
+        <h1>My App</h1>
+        <ThemeToggle />
+      </div>
+    </ThemeProvider>
+  );
+}
 
-// Set theme
-themeSystem.setTheme('dark');
-
-// Toggle between light and dark
-themeSystem.toggleTheme();
-
-// Get current theme
-console.log(themeSystem.theme); // 'dark'
-console.log(themeSystem.resolvedTheme); // 'dark'
+export default App;
 ```
 
-### With Configuration
+### 2. Use the theme in your components
 
-```javascript
-import { createThemeSystem } from 'theme-mode-system';
+```tsx
+import React from 'react';
+import { useTheme } from 'psr-theme-mode';
 
-const themeSystem = createThemeSystem({
-  defaultMode: 'system',
-  storageKey: 'my-app-theme',
-  attribute: 'data-theme',
-  enableSystem: true,
-  disableTransitions: false
-});
-```
-
-### React Integration
-
-```jsx
-import React, { useEffect, useState } from 'react';
-import { createThemeSystem } from 'theme-mode-system';
-
-function ThemeProvider({ children }) {
-  const [themeSystem] = useState(() => createThemeSystem());
-  const [theme, setTheme] = useState(themeSystem.theme);
-
-  useEffect(() => {
-    const unsubscribe = themeSystem.subscribe((newTheme, resolvedTheme) => {
-      setTheme(newTheme);
-    });
-
-    return unsubscribe;
-  }, [themeSystem]);
+function MyComponent() {
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
-    <div className="theme-bg">
-      <button onClick={() => themeSystem.toggleTheme()}>
-        Toggle Theme ({theme})
+    <div>
+      <p>Current theme: {theme}</p>
+      <p>Resolved theme: {resolvedTheme}</p>
+      <button onClick={() => setTheme('dark')}>
+        Switch to Dark
       </button>
-      {children}
     </div>
   );
 }
 ```
 
-### Vue Integration
-
-```vue
-<template>
-  <div class="theme-bg">
-    <button @click="toggleTheme">
-      Toggle Theme ({{ theme }})
-    </button>
-    <slot />
-  </div>
-</template>
-
-<script>
-import { createThemeSystem } from 'theme-mode-system';
-
-export default {
-  name: 'ThemeProvider',
-  data() {
-    return {
-      themeSystem: null,
-      theme: 'system'
-    };
-  },
-  mounted() {
-    this.themeSystem = createThemeSystem();
-    this.theme = this.themeSystem.theme;
-    
-    this.unsubscribe = this.themeSystem.subscribe((newTheme) => {
-      this.theme = newTheme;
-    });
-  },
-  beforeDestroy() {
-    if (this.unsubscribe) {
-      this.unsubscribe();
-    }
-    if (this.themeSystem) {
-      this.themeSystem.destroy();
-    }
-  },
-  methods: {
-    toggleTheme() {
-      this.themeSystem.toggleTheme();
-    }
-  }
-};
-</script>
-```
-
 ## API Reference
 
-### `createThemeSystem(config?)`
+### ThemeProvider
 
-Creates a new theme system instance.
+The main provider component that manages theme state.
 
-#### Parameters
-
-- `config` (optional): Configuration object
-
-#### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `defaultMode` | `'light' \| 'dark' \| 'system'` | `'system'` | Default theme mode |
-| `storageKey` | `string` | `'theme-mode'` | localStorage key for persistence |
-| `attribute` | `string` | `'data-theme'` | HTML attribute to set on document root |
-| `enableSystem` | `boolean` | `true` | Enable system preference detection |
-| `disableTransitions` | `boolean` | `false` | Disable CSS transitions during theme change |
-
-### ThemeSystem Instance
-
-#### Properties
-
-- `theme`: Current theme mode (`'light' | 'dark' | 'system'`)
-- `resolvedTheme`: Actual applied theme (`'light' | 'dark'`)
-
-#### Methods
-
-- `setTheme(theme)`: Set the theme mode
-- `toggleTheme()`: Toggle between light and dark themes
-- `subscribe(callback)`: Subscribe to theme changes, returns unsubscribe function
-- `destroy()`: Clean up listeners and subscribers
-
-### Events
-
-The system dispatches a `theme-changed` event on the window when the theme changes:
-
-```javascript
-window.addEventListener('theme-changed', (event) => {
-  console.log('Theme changed:', event.detail);
-  // { theme: 'dark', resolvedTheme: 'dark' }
-});
+```tsx
+<ThemeProvider
+  config={{
+    defaultTheme: 'system',
+    storageKey: 'my-app-theme',
+    themes: ['light', 'dark', 'blue'],
+    enableSystem: true,
+    attribute: 'data-theme'
+  }}
+  forcedTheme="dark" // Optional: force a specific theme
+>
+  {children}
+</ThemeProvider>
 ```
 
-## CSS Integration
+#### Props
 
-Import the CSS file for pre-built theme variables and utility classes:
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `config` | `ThemeConfig` | `{}` | Theme configuration object |
+| `forcedTheme` | `string` | `undefined` | Force a specific theme |
+| `children` | `ReactNode` | - | Child components |
 
-```css
-@import 'theme-mode-system/dist/styles.css';
+#### ThemeConfig
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `defaultTheme` | `Theme` | `'system'` | Default theme when no preference is stored |
+| `storageKey` | `string` | `'psr-theme'` | localStorage key for theme persistence |
+| `attribute` | `string` | `'data-theme'` | HTML attribute name for theme |
+| `enableSystem` | `boolean` | `true` | Enable system theme detection |
+| `disableTransitionOnChange` | `boolean` | `false` | Disable transitions during theme changes |
+| `selector` | `string` | `'html'` | CSS selector for theme container |
+| `themes` | `string[]` | `['light', 'dark']` | Available theme names |
+| `mediaQuery` | `string` | `'(prefers-color-scheme: dark)'` | Media query for dark mode detection |
+
+### useTheme Hook
+
+Hook to access and control theme state.
+
+```tsx
+const {
+  theme,          // Current theme name
+  setTheme,       // Function to change theme
+  resolvedTheme,  // Actual theme (resolves 'system' to 'light'/'dark')
+  themes,         // Array of available themes
+  systemTheme,    // System preference ('light' or 'dark')
+  forcedTheme     // Forced theme if any
+} = useTheme();
 ```
 
-### CSS Variables
+### ThemeToggle Component
 
-The system provides comprehensive CSS variables for theming:
+Pre-built theme toggle component.
+
+```tsx
+<ThemeToggle
+  size="medium"
+  showLabels={true}
+  lightLabel="Light Mode"
+  darkLabel="Dark Mode"
+  systemLabel="Auto"
+  onThemeChange={(theme) => console.log('Theme changed:', theme)}
+/>
+```
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Toggle button size |
+| `showLabels` | `boolean` | `false` | Show theme labels |
+| `lightLabel` | `string` | `'Light'` | Label for light theme |
+| `darkLabel` | `string` | `'Dark'` | Label for dark theme |
+| `systemLabel` | `string` | `'System'` | Label for system theme |
+| `onThemeChange` | `(theme: string) => void` | `undefined` | Callback when theme changes |
+| `className` | `string` | `''` | Additional CSS classes |
+| `style` | `CSSProperties` | `{}` | Inline styles |
+
+## CSS Variables
+
+The package provides CSS custom properties for easy theming:
 
 ```css
 :root {
-  /* Colors */
-  --color-background: #ffffff;
-  --color-foreground: #000000;
-  --color-primary: #0066cc;
-  --color-secondary: #6b7280;
-  --color-accent: #f59e0b;
-  --color-muted: #f3f4f6;
-  --color-border: #e5e7eb;
-  
-  /* Text colors */
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-text-muted: #9ca3af;
-  
-  /* Semantic colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  --psr-bg-primary: #ffffff;
+  --psr-bg-secondary: #f8f9fa;
+  --psr-text-primary: #212529;
+  --psr-text-secondary: #6c757d;
+  --psr-border: #dee2e6;
+  --psr-accent: #0d6efd;
+  /* ... more variables */
+}
+
+[data-theme="dark"] {
+  --psr-bg-primary: #1a1a1a;
+  --psr-bg-secondary: #2d2d2d;
+  --psr-text-primary: #ffffff;
+  /* ... dark theme overrides */
 }
 ```
 
-### Utility Classes
+## Utility Functions
 
-Use pre-built utility classes for common theming needs:
+### createThemeSystem
 
-```html
-<div class="theme-bg">
-  <div class="theme-card">
-    <h1 class="theme-text-primary">Hello World</h1>
-    <p class="theme-text-secondary">This is themed content</p>
-    <button class="theme-button">Click me</button>
-    <input class="theme-input" placeholder="Type here..." />
-  </div>
-</div>
+Generate CSS for custom themes:
+
+```tsx
+import { createThemeSystem } from 'psr-theme-mode';
+
+const css = createThemeSystem({
+  light: {
+    'primary': '#ffffff',
+    'secondary': '#f8f9fa',
+    'text': '#212529'
+  },
+  dark: {
+    'primary': '#1a1a1a',
+    'secondary': '#2d2d2d',
+    'text': '#ffffff'
+  }
+});
+
+// Inject CSS into your app
+const style = document.createElement('style');
+style.textContent = css;
+document.head.appendChild(style);
+```
+
+### Other Utilities
+
+```tsx
+import {
+  getSystemTheme,
+  getStoredTheme,
+  setStoredTheme,
+  applyTheme,
+  validateThemeConfig
+} from 'psr-theme-mode';
+
+// Get system theme preference
+const systemTheme = getSystemTheme(); // 'light' | 'dark'
+
+// Manual theme storage
+const stored = getStoredTheme('my-theme-key');
+setStoredTheme('dark', 'my-theme-key');
+
+// Apply theme manually
+applyTheme('dark', { selector: 'body', attribute: 'data-theme' });
 ```
 
 ## Advanced Usage
 
 ### Custom Theme Colors
 
-```javascript
-// Define your custom colors
-const customColors = {
+```tsx
+import { ThemeProvider, createThemeSystem } from 'psr-theme-mode';
+
+const customThemes = {
   light: {
-    primary: '#007bff',
-    secondary: '#6c757d',
-    background: '#ffffff',
-    text: '#212529'
+    primary: '#ffffff',
+    secondary: '#f0f0f0',
+    accent: '#007bff',
+    text: '#333333'
   },
   dark: {
-    primary: '#4dabf7',
-    secondary: '#adb5bd',
-    background: '#121212',
+    primary: '#1a1a1a',
+    secondary: '#2d2d2d',
+    accent: '#4dabf7',
+    text: '#ffffff'
+  },
+  ocean: {
+    primary: '#0f3460',
+    secondary: '#16537e',
+    accent: '#e94560',
     text: '#ffffff'
   }
 };
 
-// Apply custom colors with CSS
-const applyCustomColors = (theme) => {
-  const colors = customColors[theme];
-  const root = document.documentElement;
-  
-  Object.entries(colors).forEach(([key, value]) => {
-    root.style.setProperty(`--color-${key}`, value);
-  });
-};
+// Generate and inject CSS
+const css = createThemeSystem(customThemes);
+const style = document.createElement('style');
+style.textContent = css;
+document.head.appendChild(style);
 
-// Subscribe to theme changes
-themeSystem.subscribe((theme, resolvedTheme) => {
-  applyCustomColors(resolvedTheme);
-});
-```
-
-### Server-Side Rendering
-
-For SSR applications, initialize the theme system after hydration:
-
-```javascript
-// Only initialize on client-side
-if (typeof window !== 'undefined') {
-  const themeSystem = createThemeSystem();
+function App() {
+  return (
+    <ThemeProvider 
+      config={{ 
+        themes: ['light', 'dark', 'ocean'],
+        defaultTheme: 'light'
+      }}
+    >
+      <YourApp />
+    </ThemeProvider>
+  );
 }
 ```
 
-### Multiple Theme Systems
+### Server-Side Rendering (SSR)
 
-You can create multiple theme systems with different configurations:
+```tsx
+import { ThemeProvider } from 'psr-theme-mode';
 
-```javascript
-const mainTheme = createThemeSystem({
-  storageKey: 'main-theme',
-  attribute: 'data-main-theme'
-});
+function App({ initialTheme }) {
+  return (
+    <ThemeProvider 
+      config={{ 
+        defaultTheme: initialTheme || 'system',
+        disableTransitionOnChange: true // Prevent flash
+      }}
+    >
+      <YourApp />
+    </ThemeProvider>
+  );
+}
+```
 
-const editorTheme = createThemeSystem({
-  storageKey: 'editor-theme',
-  attribute: 'data-editor-theme'
-});
+### Multiple Theme Instances
+
+```tsx
+function App() {
+  return (
+    <div>
+      <ThemeProvider config={{ storageKey: 'header-theme' }}>
+        <Header />
+      </ThemeProvider>
+      
+      <ThemeProvider config={{ storageKey: 'main-theme' }}>
+        <Main />
+      </ThemeProvider>
+    </div>
+  );
+}
+```
+
+## Styling Components
+
+### Using CSS Classes
+
+```css
+.my-component {
+  background-color: var(--psr-bg-primary);
+  color: var(--psr-text-primary);
+  border: 1px solid var(--psr-border);
+}
+
+/* Or use provided utility classes */
+.my-card {
+  @apply psr-themed-card;
+}
+```
+
+### Using Styled Components
+
+```tsx
+import styled from 'styled-components';
+
+const ThemedCard = styled.div`
+  background-color: var(--psr-bg-primary);
+  color: var(--psr-text-primary);
+  border: 1px solid var(--psr-border);
+  padding: 1rem;
+  border-radius: 0.5rem;
+`;
+```
+
+## TypeScript Support
+
+The package is fully typed with TypeScript:
+
+```tsx
+import { Theme, ThemeConfig, ThemeContextType } from 'psr-theme-mode';
+
+const config: ThemeConfig = {
+  defaultTheme: 'system',
+  themes: ['light', 'dark'],
+  enableSystem: true
+};
+
+function MyComponent() {
+  const themeContext: ThemeContextType = useTheme();
+  
+  const handleThemeChange = (theme: Theme) => {
+    themeContext.setTheme(theme);
+  };
+  
+  return <div>...</div>;
+}
 ```
 
 ## Browser Support
 
-- Chrome/Edge: 76+
-- Firefox: 69+
-- Safari: 12.1+
-- iOS Safari: 12.2+
-
-## TypeScript Support
-
-Full TypeScript support with comprehensive type definitions:
-
-```typescript
-import { ThemeMode, ThemeConfig, ThemeSystem } from 'theme-mode-system';
-
-const config: ThemeConfig = {
-  defaultMode: 'system',
-  enableSystem: true
-};
-
-const themeSystem: ThemeSystem = createThemeSystem(config);
-```
-
-## License
-
-MIT
+- Modern browsers with CSS custom properties support
+- IE 11+ (with polyfill for CSS custom properties)
+- React 16.8+ (hooks support required)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.# Testing-
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for more information.
+
+## Changelog
+
+### 1.0.0
+- Initial release
+- ThemeProvider and useTheme hook
+- ThemeToggle component
+- CSS custom properties
+- TypeScript support
+- System theme detection
+- Local storage persistence
